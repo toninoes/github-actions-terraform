@@ -1,0 +1,65 @@
+name: 'Terraform CI/CD'
+defaults:
+  run:
+    working-directory: "terraform"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  terraform_plan: # CI
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v1.2.1
+        with:
+          terraform_version: 1.0.11
+
+      - name: Verify Terraform version
+        run: terraform --version
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        run: terraform plan -no-color
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+  terraform_apply: # CD
+    runs-on: ubuntu-latest
+    needs: [ terraform_plan ]
+    environment: prod
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hashicorp/setup-terraform@v1.2.1
+        with:
+          terraform_version: 1.0.11
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
