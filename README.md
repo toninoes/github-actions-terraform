@@ -6,7 +6,7 @@ Once your [infracost workflow](https://github.com/toninoes/github-actions-terraf
 
 ![alt text](images/infracost-comment.png "Infracost Comment Image")
 
-Also, you can use locally in [pre-commit](https://github.com/antonbabenko/pre-commit-terraform#infracost_breakdown) and add infrasec hook, with costs checks, and for example with this configuration:
+Also, you can use locally in [pre-commit](https://github.com/antonbabenko/pre-commit-terraform#infracost_breakdown) and add infracost hook, with costs checks, and for example with this configuration:
 
 ```yaml
     - id: infracost_breakdown
