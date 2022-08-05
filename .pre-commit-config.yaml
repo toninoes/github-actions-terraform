@@ -1,0 +1,18 @@
+repos:
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.74.1
+  hooks:
+    - id: terraform_fmt
+    - id: terraform_validate
+    - id: terraform_tflint
+      args:
+        - --args=--loglevel=warn
+        - --args=--disable-rule=terraform_module_pinned_source
+        - --args=--module
+    - id: infracost_breakdown
+      args:
+        - --args=--path=./terraform
+        - --args=--terraform-var-file="terraform.tfvars"
+        - --hook-config='.projects[].diff.totalMonthlyCost|tonumber < 100'
+        - --hook-config='.currency == "USD"'
+      verbose: true # Always show costs
