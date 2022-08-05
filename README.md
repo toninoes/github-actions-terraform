@@ -4,4 +4,20 @@ This project is made in the context of [flexyfriday](https://www.notion.so/holal
 
 Once your [infracost workflow](https://github.com/toninoes/github-actions-terraform-infracost/blob/main/.github/workflows/infracost.yaml) is configured, when doing PR, you can get a nice comment like below
 
-![alt text](infracost-comment.png "Infracost Comment Image")
+![alt text](images/infracost-comment.png "Infracost Comment Image")
+
+Also, you can use locally in [pre-commit](https://github.com/antonbabenko/pre-commit-terraform#infracost_breakdown) and add infrasec hook, with costs checks, and for example with this configuration:
+
+```yaml
+    - id: infracost_breakdown
+      args:
+        - --args=--path=./terraform
+        - --args=--terraform-var-file="terraform.tfvars"
+        - --hook-config='.projects[].diff.totalMonthlyCost|tonumber < 2'
+        - --hook-config='.currency == "USD"'
+      verbose: true # Always show costs
+```
+
+will Fail
+
+![alt text](images/infracost-pre-commit.png "Infracost with pre-commit")
